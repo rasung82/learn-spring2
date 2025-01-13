@@ -18,6 +18,10 @@ repositories {
 }
 
 dependencies {
+	// Add Lombok
+	compileOnly 'org.projectlombok:lombok' // 컴파일 타임에만 사용
+	annotationProcessor 'org.projectlombok:lombok' // 애노테이션 프로세싱
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-mustache'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
