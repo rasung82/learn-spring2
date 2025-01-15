@@ -2,10 +2,7 @@ package com.example.starter.entity;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @AllArgsConstructor
@@ -15,7 +12,7 @@ import javax.persistence.Id;
 @Setter
 public class Article {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // DB가 id를 자동 생성
     private Long id;
 
     @Column
