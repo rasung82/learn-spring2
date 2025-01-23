@@ -2,7 +2,7 @@ package com.example.starter.api;
 
 import com.example.starter.dto.ArticleForm;
 import com.example.starter.entity.Article;
-import com.example.starter.repository.ArticleRepository;
+import com.example.starter.service.ArticleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,7 @@ import java.util.List;
 public class ArticleApiController {
 
     @Autowired // 스프링 부트가 미리 생성해놓은 객체를 주입
-    private ArticleRepository articleRepository;
+    private ArticleService articleService;
 
     @GetMapping("/api/hello")
     public String hello() {
@@ -25,42 +25,43 @@ public class ArticleApiController {
 
     @GetMapping("/api/articles")
     public List<Article> getArticles() {
-        return (List<Article>) articleRepository.findAll();
+        return articleService.index();
     }
 
     @GetMapping("/api/articles/{id}")
     public Article getArticle(@PathVariable Long id) {
-        return articleRepository.findById(id).orElse(null);
+        return articleService.show(id);
     }
 
     @PostMapping("/api/articles")
-    public Article createArticle(@RequestBody ArticleForm dto) {
-        Article article = dto.toEntity();
-        return articleRepository.save(article);
+    public ResponseEntity<Article> createArticle(@RequestBody ArticleForm dto) {
+        Article created = articleService.create(dto);
+        return (created != null)
+                ? ResponseEntity.status(HttpStatus.OK).body(created)
+                : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     @PatchMapping("/api/articles/{id}")
     public ResponseEntity<Article> updateArticle(@PathVariable Long id, @RequestBody ArticleForm dto) {
-        Article article = dto.toEntity();
-        log.info("{}, {}", id, article.toString());
-
-        Article target = articleRepository.findById(id).orElse(null);
-        if (target == null || id != article.getId()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-
-        Article updated = articleRepository.save(article);
-        return ResponseEntity.status(HttpStatus.OK).body(updated);
+        Article updated = articleService.update(id, dto);
+        return (updated != null)
+                ? ResponseEntity.status(HttpStatus.OK).body(updated)
+                : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     @DeleteMapping("/api/articles/{id}")
     public ResponseEntity<Article> deleteArticle(@PathVariable Long id) {
-        Article article = articleRepository.findById(id).orElse(null);
-        if(article == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+        Article deleted = articleService.delete(id);
+        return (deleted != null)
+                ? ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+                : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
 
-        articleRepository.delete(article);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    @PostMapping("/api/articles/all")
+    public ResponseEntity<List<Article>> createAllArticle(@RequestBody List<ArticleForm> dtos) {
+        List<Article> created = articleService.createArticles(dtos);
+        return (created != null)
+                ? ResponseEntity.status(HttpStatus.OK).body(created)
+                : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 }
